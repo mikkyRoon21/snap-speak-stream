@@ -35,10 +35,10 @@ const Index = () => {
     },
   ]);
 
-  const handleCreatePost = (content: string, media?: { type: "image" | "video" | "gif"; url: string }) => {
+  const handleCreatePost = (author: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => {
     const newPost: Post = {
       id: Date.now().toString(),
-      author: "You",
+      author,
       content,
       media,
       timestamp: new Date(),
@@ -56,7 +56,7 @@ const Index = () => {
     ));
   };
 
-  const handleComment = (postId: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => {
+  const handleComment = (postId: string, author: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => {
     setPosts(posts.map((post) => 
       post.id === postId 
         ? {
@@ -65,7 +65,7 @@ const Index = () => {
               ...post.comments,
               {
                 id: Date.now().toString(),
-                author: "You",
+                author,
                 content,
                 timestamp: new Date(),
                 media,

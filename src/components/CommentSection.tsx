@@ -8,10 +8,11 @@ import { toast } from "@/hooks/use-toast";
 
 interface CommentSectionProps {
   comments: Comment[];
-  onAddComment: (content: string, media?: { type: "image" | "video" | "gif"; url: string }) => void;
+  onAddComment: (author: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => void;
 }
 
 export const CommentSection = ({ comments, onAddComment }: CommentSectionProps) => {
+  const [nickname, setNickname] = useState(() => localStorage.getItem("userNickname") || "");
   const [newComment, setNewComment] = useState("");
   const [mediaPreview, setMediaPreview] = useState<{ type: "image" | "video" | "gif"; url: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +40,16 @@ export const CommentSection = ({ comments, onAddComment }: CommentSectionProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!nickname.trim()) {
+      toast({
+        title: "Nickname required",
+        description: "Please enter a nickname to comment",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!newComment.trim() && !mediaPreview) {
       toast({
         title: "Empty comment",
@@ -48,7 +59,8 @@ export const CommentSection = ({ comments, onAddComment }: CommentSectionProps) 
       return;
     }
 
-    onAddComment(newComment, mediaPreview || undefined);
+    localStorage.setItem("userNickname", nickname);
+    onAddComment(nickname, newComment, mediaPreview || undefined);
     setNewComment("");
     setMediaPreview(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -112,6 +124,13 @@ export const CommentSection = ({ comments, onAddComment }: CommentSectionProps) 
       ))}
 
       <form onSubmit={handleSubmit} className="space-y-3">
+        <Input
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="Your nickname"
+          className="font-semibold"
+        />
+        
         {mediaPreview && (
           <div className="relative rounded-lg overflow-hidden border border-border max-w-md">
             <Button
@@ -181,7 +200,7 @@ export const CommentSection = ({ comments, onAddComment }: CommentSectionProps) 
             <Video className="h-4 w-4" />
           </Button>
 
-          <Button type="submit" size="icon" disabled={!newComment.trim() && !mediaPreview}>
+          <Button type="submit" size="icon" disabled={(!newComment.trim() && !mediaPreview) || !nickname.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>

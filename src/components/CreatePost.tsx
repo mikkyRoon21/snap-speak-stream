@@ -1,16 +1,18 @@
 import { useState, useRef } from "react";
 import { Image, Video, Smile, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "@/hooks/use-toast";
 
 interface CreatePostProps {
-  onCreatePost: (content: string, media?: { type: "image" | "video" | "gif"; url: string }) => void;
+  onCreatePost: (author: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => void;
 }
 
 export const CreatePost = ({ onCreatePost }: CreatePostProps) => {
+  const [nickname, setNickname] = useState(() => localStorage.getItem("userNickname") || "");
   const [content, setContent] = useState("");
   const [mediaPreview, setMediaPreview] = useState<{ type: "image" | "video" | "gif"; url: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -29,6 +31,16 @@ export const CreatePost = ({ onCreatePost }: CreatePostProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!nickname.trim()) {
+      toast({
+        title: "Nickname required",
+        description: "Please enter a nickname to post",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!content.trim() && !mediaPreview) {
       toast({
         title: "Empty post",
@@ -38,7 +50,8 @@ export const CreatePost = ({ onCreatePost }: CreatePostProps) => {
       return;
     }
 
-    onCreatePost(content, mediaPreview || undefined);
+    localStorage.setItem("userNickname", nickname);
+    onCreatePost(nickname, content, mediaPreview || undefined);
     setContent("");
     setMediaPreview(null);
     
@@ -62,12 +75,19 @@ export const CreatePost = ({ onCreatePost }: CreatePostProps) => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex gap-4">
           <Avatar className="h-12 w-12 ring-2 ring-primary/20">
-            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-semibold">
-              You
+            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-semibold text-xs">
+              {nickname.slice(0, 2).toUpperCase() || "?"}
             </AvatarFallback>
           </Avatar>
 
           <div className="flex-1 space-y-3">
+            <Input
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="Your nickname"
+              className="font-semibold"
+            />
+            
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -153,7 +173,7 @@ export const CreatePost = ({ onCreatePost }: CreatePostProps) => {
           <Button
             type="submit"
             variant="gradient"
-            disabled={!content.trim() && !mediaPreview}
+            disabled={(!content.trim() && !mediaPreview) || !nickname.trim()}
             className="px-6"
           >
             Post
