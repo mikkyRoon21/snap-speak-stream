@@ -56,7 +56,7 @@ const Index = () => {
     ));
   };
 
-  const handleComment = (postId: string, content: string) => {
+  const handleComment = (postId: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => {
     setPosts(posts.map((post) => 
       post.id === postId 
         ? {
@@ -68,6 +68,7 @@ const Index = () => {
                 author: "You",
                 content,
                 timestamp: new Date(),
+                media,
               },
             ],
           }

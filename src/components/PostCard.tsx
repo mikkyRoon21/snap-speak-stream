@@ -23,12 +23,16 @@ export interface Comment {
   author: string;
   content: string;
   timestamp: Date;
+  media?: {
+    type: "image" | "video" | "gif";
+    url: string;
+  };
 }
 
 interface PostCardProps {
   post: Post;
   onLike: (postId: string) => void;
-  onComment: (postId: string, content: string) => void;
+  onComment: (postId: string, content: string, media?: { type: "image" | "video" | "gif"; url: string }) => void;
 }
 
 export const PostCard = ({ post, onLike, onComment }: PostCardProps) => {
@@ -128,7 +132,7 @@ export const PostCard = ({ post, onLike, onComment }: PostCardProps) => {
           {showComments && (
             <CommentSection
               comments={post.comments}
-              onAddComment={(content) => onComment(post.id, content)}
+              onAddComment={(content, media) => onComment(post.id, content, media)}
             />
           )}
         </div>
